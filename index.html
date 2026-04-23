@@ -33,8 +33,13 @@
 
         <!-- Grain texture overlay -->
         <div class="mesh-grain"></div>
+        <!-- Mobile Menu Toggle -->
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+            <span class="material-icons">menu</span>
+        </button>
+
         <!-- Icon-Only Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="sidebar-logo">E</div>
             
             <nav class="sidebar-nav">
@@ -898,6 +903,77 @@
         
         // Update greeting every minute
         setInterval(updateGreeting, 60000);
+    });
+
+    // Mobile Menu Functionality
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebar = document.getElementById('sidebar');
+    let isMenuOpen = false;
+
+    function toggleMobileMenu() {
+        isMenuOpen = !isMenuOpen;
+        
+        if (isMenuOpen) {
+            sidebar.classList.add('mobile-open');
+            mobileMenuToggle.innerHTML = '<span class="material-icons">close</span>';
+            // Add overlay to close menu when clicking outside
+            document.body.style.overflow = 'hidden';
+        } else {
+            sidebar.classList.remove('mobile-open');
+            mobileMenuToggle.innerHTML = '<span class="material-icons">menu</span>';
+            document.body.style.overflow = '';
+        }
+    }
+
+    function closeMobileMenu() {
+        if (isMenuOpen) {
+            isMenuOpen = false;
+            sidebar.classList.remove('mobile-open');
+            mobileMenuToggle.innerHTML = '<span class="material-icons">menu</span>';
+            document.body.style.overflow = '';
+        }
+    }
+
+    // Mobile menu toggle event
+    if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', toggleMobileMenu);
+    }
+
+    // Close menu when clicking on navigation items (mobile)
+    const sidebarIcons = document.querySelectorAll('.sidebar-icon');
+    sidebarIcons.forEach(icon => {
+        icon.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                closeMobileMenu();
+            }
+        });
+    });
+
+    // Close menu when clicking outside (mobile)
+    document.addEventListener('click', (e) => {
+        if (isMenuOpen && 
+            !sidebar.contains(e.target) && 
+            !mobileMenuToggle.contains(e.target)) {
+            closeMobileMenu();
+        }
+    });
+
+    // Handle window resize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (window.innerWidth > 768 && isMenuOpen) {
+                closeMobileMenu();
+            }
+        }, 250);
+    });
+
+    // Handle escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isMenuOpen) {
+            closeMobileMenu();
+        }
     });
 </script>
 </body>

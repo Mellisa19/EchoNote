@@ -2401,15 +2401,324 @@ main {
     }
 }
 
+/* MOBILE MENU TOGGLE (Hidden on desktop) */
+.mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-menu-toggle:hover {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: white;
+    transform: scale(1.05);
+}
+
+.mobile-menu-toggle .material-icons {
+    font-size: 20px;
+}
+
+/* MOBILE FIRST RESPONSIVE DESIGN */
+
+/* Tablets and Large Phones */
 @media (max-width: 768px) {
+    /* Show mobile menu toggle */
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    /* Sidebar becomes mobile menu */
     .sidebar {
-        width: 240px;
+        position: fixed;
+        left: -280px;
+        top: 0;
+        width: 280px;
+        height: 100vh;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        z-index: 1000;
+        transition: transform 0.3s ease;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .sidebar.mobile-open {
+        transform: translateX(280px);
+    }
+    
+    /* Mobile menu toggle */
+    .mobile-menu-toggle {
+        display: block;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1001;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .mobile-menu-toggle:hover {
+        background: var(--purple);
+        border-color: var(--purple);
+        color: white;
+    }
+    
+    /* Main content adjusts */
+    .main-content {
+        margin-left: 0;
+        padding: 80px 16px 20px;
     }
     
     .top-nav {
-        left: 240px;
+        left: 0;
+        right: 0;
+        padding: 16px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        position: fixed;
+        top: 0;
+        z-index: 999;
     }
     
+    .top-nav-left {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .top-nav-right {
+        gap: 8px;
+    }
+    
+    .search-bar {
+        display: none;
+    }
+    
+    .upgrade-btn {
+        display: none;
+    }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+    
+    /* Stats grid */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .stat-item {
+        padding: 16px;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+    }
+    
+    .stat-label {
+        font-size: 12px;
+    }
+    
+    /* Cards */
+    .firebase-card {
+        border-radius: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .firebase-card-body {
+        padding: 20px;
+    }
+    
+    .firebase-card-header {
+        padding: 20px 20px 0;
+    }
+    
+    /* Buttons */
+    .btn {
+        padding: 12px 20px;
+        font-size: 14px;
+        border-radius: 12px;
+        min-height: 44px; /* Touch-friendly */
+    }
+    
+    .btn-primary {
+        font-size: 14px;
+    }
+    
+    .icon-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+    }
+    
+    /* Meeting cards */
+    .meeting-card {
+        margin-bottom: 16px;
+        border-radius: 16px;
+    }
+    
+    .meeting-card-header {
+        padding: 20px 20px 16px;
+    }
+    
+    .meeting-card-body {
+        padding: 0 20px 20px;
+    }
+    
+    /* Integration cards */
+    .integrations-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .integration-card {
+        border-radius: 16px;
+        padding: 20px;
+    }
+    
+    /* Quick actions */
+    .quick-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .quick-action-btn {
+        padding: 16px 12px;
+        border-radius: 16px;
+        min-height: 80px;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .quick-action-btn .material-icons {
+        font-size: 24px;
+    }
+    
+    quick-action-btn span:last-child {
+        font-size: 12px;
+    }
+    
+    /* Forms */
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-control {
+        padding: 16px;
+        font-size: 16px; /* Prevents zoom on iOS */
+        border-radius: 12px;
+        min-height: 44px;
+    }
+    
+    /* Typography */
+    .page-title {
+        font-size: 24px;
+        margin-bottom: 16px;
+    }
+    
+    .section-title {
+        font-size: 18px;
+        margin-bottom: 16px;
+    }
+    
+    /* Toast notifications */
+    #toast-container {
+        top: 80px;
+        right: 16px;
+        left: 16px;
+    }
+    
+    .toast {
+        min-width: auto;
+        padding: 16px;
+        font-size: 14px;
+    }
+    
+    /* Modal */
+    .calendar-modal-content {
+        margin: 16px;
+        padding: 24px;
+        border-radius: 20px;
+    }
+    
+    /* Upload area */
+    .upload-area {
+        padding: 40px 20px;
+        border-radius: 16px;
+        min-height: 200px;
+    }
+    
+    /* Loading states */
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+    }
+    
+    /* Animations */
+    .blob {
+        opacity: 0.3; /* Reduce animation intensity on mobile */
+    }
+}
+
+/* Small Phones */
+@media (max-width: 480px) {
+    /* Even more compact layout */
+    .main-content {
+        padding: 80px 12px 20px;
+    }
+    
+    .top-nav {
+        padding: 12px 16px;
+    }
+    
+    .mobile-menu-toggle {
+        top: 12px;
+        left: 12px;
+        padding: 10px;
+    }
+    
+    /* Stats become single column */
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .stat-item {
+        padding: 16px;
+        text-align: center;
+    }
+    
+    /* Quick actions become single column */
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .quick-action-btn {
+        min-height: 60px;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 16px;
+    }
+    
+    /* Typography adjustments */
     .page-title {
         font-size: 20px;
     }
@@ -2418,13 +2727,214 @@ main {
         font-size: 16px;
     }
     
+    /* Cards */
+    .firebase-card-body {
+        padding: 16px;
+    }
+    
+    .firebase-card-header {
+        padding: 16px 16px 0;
+    }
+    
+    /* Buttons */
     .btn {
-        padding: 8px 16px;
+        padding: 14px 16px;
+        font-size: 14px;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .btn-text {
+        width: auto;
+    }
+    
+    /* Meeting cards */
+    .meeting-item {
+        padding: 16px;
+        border-radius: 12px;
+    }
+    
+    .meeting-details {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .meeting-title {
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .meeting-meta {
         font-size: 12px;
     }
     
-    .card {
+    /* Integration cards */
+    .integration-card {
         padding: 16px;
+    }
+    
+    .integration-logo {
+        margin-bottom: 12px;
+    }
+    
+    .integration-info h4 {
+        font-size: 16px;
+    }
+    
+    .integration-info p {
+        font-size: 13px;
+    }
+    
+    /* Modal */
+    .calendar-modal-content {
+        margin: 8px;
+        padding: 20px;
+        border-radius: 16px;
+    }
+    
+    .calendar-modal-title {
+        font-size: 18px;
+    }
+    
+    /* Upload area */
+    .upload-area {
+        padding: 30px 16px;
+        min-height: 150px;
+    }
+    
+    .upload-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+    }
+    
+    .upload-text {
+        font-size: 14px;
+    }
+    
+    /* Form elements */
+    .form-control {
+        padding: 14px;
+        font-size: 16px;
+    }
+    
+    /* Search */
+    .search-bar {
+        display: none;
+    }
+    
+    /* User menu */
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 10px;
+    }
+    
+    /* Empty states */
+    .empty-state {
+        padding: 40px 20px;
+    }
+    
+    .empty-state .material-icons {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+    
+    .empty-state h3 {
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+    
+    .empty-state p {
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+}
+
+/* Large Tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .sidebar {
+        width: 240px;
+    }
+    
+    .main-content {
+        margin-left: 240px;
+        padding: 80px 24px 20px;
+    }
+    
+    .top-nav {
+        left: 240px;
+        right: 0;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .integrations-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .quick-actions-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 600px) and (orientation: landscape) {
+    .mobile-menu-toggle {
+        top: 8px;
+        left: 8px;
+        padding: 8px;
+    }
+    
+    .top-nav {
+        padding: 8px 16px;
+        height: 60px;
+    }
+    
+    .main-content {
+        padding-top: 60px;
+    }
+    
+    .calendar-modal-content {
+        max-height: 90vh;
+        margin: 8px;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    .btn:hover,
+    .icon-btn:hover,
+    .sidebar-icon:hover {
+        transform: none;
+    }
+    
+    .btn:active,
+    .icon-btn:active,
+    .sidebar-icon:active {
+        transform: scale(0.95);
+        transition: transform 0.1s;
+    }
+    
+    /* Increase tap targets */
+    .sidebar-icon {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .meeting-item {
+        padding: 20px;
+        margin-bottom: 12px;
+    }
+    
+    .integration-card {
+        padding: 24px;
     }
 }
 
