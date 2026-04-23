@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoNote - AI Meeting Transcription & Summarization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Palette & tokens */
+        :root {
+            --bg: #08090f;
+            --surface: #0f1118;
+            --card: #12141e;
+            --border: #1c1f30;
+            --purple: #7C3AED;
+            --purple-light: #A78BFA;
+            --cyan: #06B6D4;
+            --green: #10B981;
+            --rose: #F43F5E;
+            --amber: #F59E0B;
+            --text: #EEF0F8;
+            --muted: #6B7280;
+            --dim: #374151;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1e2235;
+            border-radius: 2px;
+        }
+
+        input, button {
+            font-family: 'Sora', sans-serif;
+            outline: none;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Sora', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes float {
+            0%,100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes float2 {
+            0%,100% { transform: translateY(0px) rotate(-1deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+
+        @keyframes blink {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        @keyframes wave {
+            0%,100% { height: 4px; }
+            50% { height: 14px; }
+        }
+
+        @keyframes ringPulse {
+            0%,100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 0.3; }
+        }
+
+        @keyframes marquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        @keyframes shimmer {
+            from { background-position: -400px 0; }
+            to { background-position: 400px 0; }
+        }
+
+        .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px #7C3AED55; }
+        .cta-btn { transition: all 0.2s ease !important; }
+        .feat-card:hover { border-color: var(--fc) !important; background: #16192e; }
+        .feat-card { transition: all 0.2s ease; }
+        .nav-link:hover { color: #EEF0F8 !important; }
+        .nav-link { transition: color 0.15s; }
+        .logo-pill:hover { border-color: #2a2d45 !important; color: #9CA3AF !important; }
+        .logo-pill { transition: all 0.2s; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="navbar" style="display: flex; align-items: center; justify-content: space-between; padding: 20px 40px; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: transparent;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--purple), var(--cyan)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 18px;">E</div>
+            <span style="font-weight: 800; font-size: 20px; letter-spacing: -0.5px;">EchoNote</span>
+        </div>
+        <div style="display: flex; gap: 40px;">
+            <span class="nav-link" style="font-size: 14px; color: var(--muted); cursor: pointer; transition: color 0.2s;">Features</span>
+            <span class="nav-link" style="font-size: 14px; color: var(--muted); cursor: pointer; transition: color 0.2s;">Pricing</span>
+            <span class="nav-link" style="font-size: 14px; color: var(--muted); cursor: pointer; transition: color 0.2s;">Integrations</span>
+            <span class="nav-link" style="font-size: 14px; color: var(--muted); cursor: pointer; transition: color 0.2s;">Blog</span>
+        </div>
+        <div style="display: flex; gap: 16px;">
+            <button onclick="window.location.href='/dashboard'" style="background: none; border: 1px solid var(--border); color: var(--text); padding: 10px 20px; border-radius: 10px; cursor: pointer; font-size: 14px; transition: all 0.2s;">Sign in</button>
+            <button onclick="window.location.href='/dashboard'" class="cta-btn" style="background: linear-gradient(135deg, var(--purple), var(--purple-light)); border: none; color: white; padding: 10px 24px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s;">Get started free</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120px 40px 80px; position: relative; overflow: hidden;">
+        <!-- Background glow blobs -->
+        <div style="position: absolute; top: 15%; left: 10%; width: 500px; height: 500px; border-radius: 50%; background: var(--purple); filter: blur(100px); opacity: 0.3;"></div>
+        <div style="position: absolute; top: 30%; right: 5%; width: 400px; height: 400px; border-radius: 50%; background: var(--cyan); filter: blur(100px); opacity: 0.3;"></div>
+        <div style="position: absolute; bottom: 10%; left: 30%; width: 300px; height: 300px; border-radius: 50%; background: var(--amber); filter: blur(100px); opacity: 0.3;"></div>
+
+        <!-- Social proof avatars -->
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 40px;">
+            <div style="display: flex;">
+                <svg width="32" height="32" viewBox="0 0 64 64" style="border-radius: 5px; overflow: hidden; border: 2px solid var(--bg);">
+                    <circle cx="32" cy="32" r="32" fill="#7C3AED33" />
+                    <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                    <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                    <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                </svg>
+                <svg width="32" height="32" viewBox="0 0 64 64" style="border-radius: 5px; overflow: hidden; border: 2px solid var(--bg); margin-left: -10px;">
+                    <circle cx="32" cy="32" r="32" fill="#0891B233" />
+                    <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                    <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                    <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                </svg>
+                <svg width="32" height="32" viewBox="0 0 64 64" style="border-radius: 5px; overflow: hidden; border: 2px solid var(--bg); margin-left: -10px;">
+                    <circle cx="32" cy="32" r="32" fill="#05966933" />
+                    <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                    <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                    <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                </svg>
+                <svg width="32" height="32" viewBox="0 0 64 64" style="border-radius: 5px; overflow: hidden; border: 2px solid var(--bg); margin-left: -10px;">
+                    <circle cx="32" cy="32" r="32" fill="#DC262633" />
+                    <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                    <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                    <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                </svg>
+            </div>
+            <span style="font-size: 13px; color: var(--muted);">
+                <span style="color: var(--text); font-weight: 600;">2,400+ teams</span> trust EchoNote
+            </span>
+        </div>
+
+        <!-- Headline -->
+        <h1 style="font-size: clamp(42px, 6vw, 76px); font-weight: 800; letter-spacing: -2px; line-height: 1.08; text-align: center; max-width: 780px; animation: fadeUp 0.6s ease 0.15s both;">
+            Every meeting, 
+            <span style="background: linear-gradient(90deg, #A78BFA, #06B6D4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">remembered</span>
+             & acted on
+        </h1>
+        
+        <p style="font-size: 18px; color: var(--muted); max-width: 520px; text-align: center; line-height: 1.75; margin-top: 22px; animation: fadeUp 0.6s ease 0.25s both; font-weight: 400;">
+            EchoNote transcribes, summarizes, and extracts action items from every calendar invite, video call, and voice memo.
+        </p>
+
+        <!-- CTA row -->
+        <div style="display: flex; gap: 10px; margin-top: 36px; animation: fadeUp 0.6s ease 0.35s both;">
+            <div style="display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; width: 320px;">
+                <input id="email-input" placeholder="Enter your work email" style="flex: 1; background: none; border: none; color: var(--text); font-size: 13px; padding: 12px 16px;">
+            </div>
+            <button class="cta-btn" onclick="window.location.href='/dashboard'" style="background: linear-gradient(135deg, #7C3AED, #6D28D9); border: none; color: #fff; font-size: 14px; font-weight: 700; padding: 12px 28px; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 24px #7C3AED55;">
+                Start for free →
+            </button>
+        </div>
+        
+        <p style="font-size: 12px; color: var(--dim); margin-top: 12px; animation: fadeUp 0.6s ease 0.45s both;">
+            Free forever for individuals · No credit card needed
+        </p>
+
+        <!-- Floating cards -->
+        <div style="position: relative; width: 100%; max-width: 900px; margin-top: 80px; display: flex; justify-content: center; position: relative;">
+            <div style="animation: float 5s ease-in-out infinite;">
+                <div style="background: #12141eee; border: 1px solid var(--border); border-radius: 20px; padding: 20px; backdrop-filter: blur(20px); box-shadow: 0 24px 80px #00000088; width: 320px;">
+                    <!-- Recording badge -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: #EF4444; animation: blink 2s ease-in-out infinite;"></div>
+                            <span style="font-size: 11px; color: var(--muted); font-family: monospace;">REC 42:18</span>
+                        </div>
+                        <span style="font-size: 10px; background: var(--purple)22; color: var(--purple); padding: 4px 8px; border-radius: 6px; font-weight: 600;">LIVE</span>
+                    </div>
+                    
+                    <!-- Speaker grid -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;">
+                        <div style="background: var(--purple)18; border: 1px solid var(--purple)55; border-radius: 12px; padding: 10px 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.3s;">
+                            <svg width="44" height="44" viewBox="0 0 64 64">
+                                <circle cx="32" cy="32" r="32" fill="#7C3AED33" />
+                                <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                                <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                                <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                                <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                                <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                                <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                                <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                                <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                            </svg>
+                            <span style="font-size: 10px; color: var(--text);">Mellisa</span>
+                        </div>
+                        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.3s;">
+                            <svg width="44" height="44" viewBox="0 0 64 64">
+                                <circle cx="32" cy="32" r="32" fill="#0891B233" />
+                                <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                                <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                                <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                                <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                                <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                                <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                                <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                                <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                            </svg>
+                            <span style="font-size: 10px; color: var(--muted);">Jordan</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Live transcript line -->
+                    <div style="background: var(--surface); border-radius: 10px; padding: 10px 12px;">
+                        <div style="font-size: 10px; color: var(--purple); font-weight: 600; margin-bottom: 4px;">Mellisa</div>
+                        <div style="font-size: 12px; color: var(--muted); line-height: 1.6;">
+                            Let's align on the Q2 priorities before we finalize scope...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="position: absolute; right: 5%; top: 40px; animation: float2 6s ease-in-out infinite;">
+                <div style="background: #12141eee; border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px; backdrop-filter: blur(16px); box-shadow: 0 16px 50px #00000066; width: 260px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <div style="width: 24px; height: 24px; border-radius: 6px; background: var(--purple); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">AI</div>
+                        <span style="font-size: 12px; font-weight: 600; color: var(--text);">AI Summary</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; gap: 8px; align-items: flex-start;">
+                            <div style="width: 5px; height: 5px; border-radius: 50%; background: var(--green); margin-top: 6px;"></div>
+                            <span style="font-size: 12px; color: var(--muted);">Q2 roadmap priorities aligned</span>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: flex-start;">
+                            <div style="width: 5px; height: 5px; border-radius: 50%; background: var(--green); margin-top: 6px;"></div>
+                            <span style="font-size: 12px; color: var(--muted);">API integration unblocked ✓</span>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: flex-start;">
+                            <div style="width: 5px; height: 5px; border-radius: 50%; background: var(--dim); margin-top: 6px;"></div>
+                            <span style="font-size: 12px; color: var(--dim); text-decoration: line-through;">3 action items assigned</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action item badge -->
+            <div style="position: absolute; left: 4%; bottom: 30px; background: #12141eee; border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px; backdrop-filter: blur(16px); animation: float 7s ease-in-out 2s infinite; box-shadow: 0 12px 40px #00000066;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 34px; height: 34px; border-radius: 8px; background: var(--green); display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">→</div>
+                    <div>
+                        <div style="font-size: 12px; font-weight: 600; color: var(--text);">Action item assigned</div>
+                        <div style="font-size: 11px; color: var(--muted);">Priya → Share Figma link</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Logo Marquee -->
+    <section style="padding: 28px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); overflow: hidden;">
+        <p style="text-align: center; font-size: 11px; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px;">Works with the tools your team already uses</p>
+        <div style="display: flex; animation: marquee 18s linear infinite;">
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">Notion</div>
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">Slack</div>
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">Zoom</div>
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">Google Meet</div>
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">HubSpot</div>
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">Linear</div>
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">Jira</div>
+            <!-- Duplicate for seamless loop -->
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">Notion</div>
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">Slack</div>
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">Zoom</div>
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">Google Meet</div>
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">HubSpot</div>
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">Linear</div>
+            <div class="logo-pill" style="margin: 0 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 20px; font-size: 13px; font-weight: 600; color: var(--dim); cursor: pointer; white-space: nowrap;">Jira</div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section style="padding: 100px 40px; max-width: 1080px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 60px;">
+            <span style="font-size: 11px; color: var(--purple); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">How it works</span>
+            <h2 style="font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing: -1px; margin-bottom: 14px;">From call to clarity in minutes</h2>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+            <div style="background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; animation: fadeUp 0.6s ease 0.1s both; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 16px; right: 20px; font-size: 32px; font-weight: 800; color: var(--purple); opacity: 0.2;">01</div>
+                <div style="margin-bottom: 16px;">
+                    <svg width="52" height="52" viewBox="0 0 64 64">
+                        <circle cx="32" cy="32" r="32" fill="#7C3AED33" />
+                        <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                        <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                        <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                        <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                        <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                        <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                        <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                        <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    </svg>
+                </div>
+                <div style="font-size: 11px; color: var(--purple); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Step 1</div>
+                <h3 style="font-size: 17px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 8px;">Join your meeting</h3>
+                <p style="font-size: 13px; color: var(--muted); line-height: 1.7;">EchoNote joins any Zoom, Google Meet, or Teams call automatically via calendar integration.</p>
+            </div>
+            <div style="background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; animation: fadeUp 0.6s ease 0.2s both; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 16px; right: 20px; font-size: 32px; font-weight: 800; color: var(--purple); opacity: 0.2;">02</div>
+                <div style="margin-bottom: 16px;">
+                    <svg width="52" height="52" viewBox="0 0 64 64">
+                        <circle cx="32" cy="32" r="32" fill="#0891B233" />
+                        <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                        <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                        <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                        <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                        <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                        <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                        <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                        <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    </svg>
+                </div>
+                <div style="font-size: 11px; color: var(--purple); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Step 2</div>
+                <h3 style="font-size: 17px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 8px;">We listen & transcribe</h3>
+                <p style="font-size: 13px; color: var(--muted); line-height: 1.7;">Every word is captured with speaker identification and real-time transcription.</p>
+            </div>
+            <div style="background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; animation: fadeUp 0.6s ease 0.3s both; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 16px; right: 20px; font-size: 32px; font-weight: 800; color: var(--purple); opacity: 0.2;">03</div>
+                <div style="margin-bottom: 16px;">
+                    <svg width="52" height="52" viewBox="0 0 64 64">
+                        <circle cx="32" cy="32" r="32" fill="#05966933" />
+                        <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                        <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                        <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                        <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                        <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                        <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                        <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                        <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    </svg>
+                </div>
+                <div style="font-size: 11px; color: var(--purple); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Step 3</div>
+                <h3 style="font-size: 17px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 8px;">Get your brief</h3>
+                <p style="font-size: 13px; color: var(--muted); line-height: 1.7;">The moment you hang up, EchoNote delivers a complete summary with action items.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section style="padding: 80px 40px; background: var(--surface); border-top: 1px solid var(--border);">
+        <div style="max-width: 1080px; margin: 0 auto;">
+            <div style="text-align: center; margin-bottom: 56px;">
+                <span style="font-size: 11px; color: var(--cyan); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Features</span>
+                <h2 style="font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing: -1px; margin-bottom: 14px;">Everything your team needs</h2>
+                <p style="font-size: 16px; color: var(--muted); margin-top: 14px; line-height: 1.75;">No more "wait, who was supposed to do that?" moments.</p>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                <div class="feat-card" style="background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; animation: fadeUp 0.6s ease 0.05s both; --fc: var(--purple);">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--fc)22; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--fc); margin-bottom: 16px;">×</div>
+                    <h3 style="font-size: 15px; font-weight: 700; letter-spacing: -0.2px; margin-bottom: 8px;">Live Transcription</h3>
+                    <p style="font-size: 13px; color: var(--muted); line-height: 1.7;">Word-for-word transcription as people speak, with speaker identification.</p>
+                </div>
+                <div class="feat-card" style="background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; animation: fadeUp 0.6s ease 0.1s both; --fc: var(--cyan);">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--fc)22; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--fc); margin-bottom: 16px;">©</div>
+                    <h3 style="font-size: 15px; font-weight: 700; letter-spacing: -0.2px; margin-bottom: 8px;">AI Summaries</h3>
+                    <p style="font-size: 13px; color: var(--muted); line-height: 1.7;">Get a crisp, structured summary the moment your meeting ends.</p>
+                </div>
+                <div class="feat-card" style="background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; animation: fadeUp 0.6s ease 0.15s both; --fc: var(--green);">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--fc)22; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--fc); margin-bottom: 16px;">✓</div>
+                    <h3 style="font-size: 15px; font-weight: 700; letter-spacing: -0.2px; margin-bottom: 8px;">Action Tracking</h3>
+                    <p style="font-size: 13px; color: var(--muted); line-height: 1.7;">EchoNote identifies every action item and assigns it to the right person.</p>
+                </div>
+                <div class="feat-card" style="background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; animation: fadeUp 0.6s ease 0.2s both; --fc: var(--rose);">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--fc)22; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--fc); margin-bottom: 16px;">+</div>
+                    <h3 style="font-size: 15px; font-weight: 700; letter-spacing: -0.2px; margin-bottom: 8px;">Speaker Intelligence</h3>
+                    <p style="font-size: 13px; color: var(--muted); line-height: 1.7;">Know who spoke, for how long, and their contribution to the conversation.</p>
+                </div>
+                <div class="feat-card" style="background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; animation: fadeUp 0.6s ease 0.25s both; --fc: var(--amber);">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--fc)22; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--fc); margin-bottom: 16px;">§</div>
+                    <h3 style="font-size: 15px; font-weight: 700; letter-spacing: -0.2px; margin-bottom: 8px;">Search Everything</h3>
+                    <p style="font-size: 13px; color: var(--muted); line-height: 1.7;">Find any moment from any meeting with our powerful search engine.</p>
+                </div>
+                <div class="feat-card" style="background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; animation: fadeUp 0.6s ease 0.3s both; --fc: var(--purple);">
+                    <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--fc)22; display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--fc); margin-bottom: 16px;">⊞</div>
+                    <h3 style="font-size: 15px; font-weight: 700; letter-spacing: -0.2px; margin-bottom: 8px;">Team Channels</h3>
+                    <p style="font-size: 13px; color: var(--muted); line-height: 1.7;">Organize meetings by team, project, or client with dedicated channels.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section style="padding: 100px 40px; max-width: 1080px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 56px;">
+            <span style="font-size: 11px; color: var(--green); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Testimonials</span>
+            <h2 style="font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing: -1px; margin-bottom: 14px;">Real teams, real results</h2>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
+            <div style="background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 24px; animation: fadeUp 0.6s ease 0.1s both; display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: flex; gap: 3px;">
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                </div>
+                <p style="font-size: 14px; color: #C4C9D8; line-height: 1.75; font-style: italic;">"EchoNote saved us 4 hours a week. Every decision is now documented and actionable."</p>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <svg width="42" height="42" viewBox="0 0 64 64">
+                        <circle cx="32" cy="32" r="32" fill="#7C3AED33" />
+                        <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                        <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                        <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                        <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                        <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                        <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                        <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                        <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    </svg>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">Mellisa R.</div>
+                        <div style="font-size: 12px; color: var(--muted);">CEO, Mavrix AI</div>
+                    </div>
+                </div>
+            </div>
+            <div style="background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 24px; animation: fadeUp 0.6s ease 0.2s both; display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: flex; gap: 3px;">
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                </div>
+                <p style="font-size: 14px; color: #C4C9D8; line-height: 1.75; font-style: italic;">"The transcript quality and AI summaries are genuinely game-changing for our distributed team."</p>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <svg width="42" height="42" viewBox="0 0 64 64">
+                        <circle cx="32" cy="32" r="32" fill="#DB277733" />
+                        <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                        <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                        <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                        <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                        <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                        <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                        <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                        <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    </svg>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">Alex L.</div>
+                        <div style="font-size: 12px; color: var(--muted);">Investor, Vertex</div>
+                    </div>
+                </div>
+            </div>
+            <div style="background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 24px; animation: fadeUp 0.6s ease 0.3s both; display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: flex; gap: 3px;">
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                    <span style="color: var(--amber); font-size: 14px;">★</span>
+                </div>
+                <p style="font-size: 14px; color: #C4C9D8; line-height: 1.75; font-style: italic;">"We onboarded the whole marketing team in one afternoon. Zero training needed."</p>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <svg width="42" height="42" viewBox="0 0 64 64">
+                        <circle cx="32" cy="32" r="32" fill="#D9770633" />
+                        <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                        <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                        <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                        <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                        <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                        <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                        <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                        <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    </svg>
+                    <div>
+                        <div style="font-size: 13px; font-weight: 600; color: var(--text);">Sam C.</div>
+                        <div style="font-size: 12px; color: var(--muted);">Marketing Director</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Faces Strip -->
+    <section style="padding: 60px 40px; background: var(--surface); border-top: 1px solid var(--border);">
+        <div style="max-width: 900px; margin: 0 auto; display: flex; align-items: center; gap: 60px;">
+            <div style="flex: 1; min-width: 260px;">
+                <h2 style="font-size: clamp(22px, 3vw, 34px); font-weight: 800; letter-spacing: -1px; margin-bottom: 16px;">
+                    Built for the way<br />real teams actually work
+                </h2>
+                <p style="font-size: 14px; color: var(--muted); line-height: 1.8;">
+                    Meetings are messy. People talk over each other, context gets lost, and action items disappear. EchoNote brings order to the chaos.
+                </p>
+            </div>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; animation: fadeUp 0.5s ease 0.07s both;">
+                    <div style="position: relative;">
+                        <svg width="56" height="56" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="32" fill="#7C3AED33" />
+                            <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                            <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                            <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                            <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                            <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                            <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                            <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                            <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                        </svg>
+                        <div style="position: absolute; bottom: 0; right: 0; width: 14px; height: 14px; border-radius: 50%; background: var(--green); border: 2px solid var(--surface);"></div>
+                    </div>
+                    <span style="font-size: 11px; color: var(--muted); text-align: center;">Mellisa R.</span>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; animation: fadeUp 0.5s ease 0.14s both;">
+                    <div style="position: relative;">
+                        <svg width="56" height="56" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="32" fill="#0891B233" />
+                            <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                            <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                            <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                            <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                            <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                            <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                            <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                            <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                        </svg>
+                        <div style="position: absolute; bottom: 0; right: 0; width: 14px; height: 14px; border-radius: 50%; background: var(--green); border: 2px solid var(--surface);"></div>
+                    </div>
+                    <span style="font-size: 11px; color: var(--muted); text-align: center;">Jordan K.</span>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; animation: fadeUp 0.5s ease 0.21s both;">
+                    <div style="position: relative;">
+                        <svg width="56" height="56" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="32" fill="#05966933" />
+                            <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                            <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                            <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                            <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                            <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                            <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                            <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                            <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                        </svg>
+                        <div style="position: absolute; bottom: 0; right: 0; width: 14px; height: 14px; border-radius: 50%; background: var(--green); border: 2px solid var(--surface);"></div>
+                    </div>
+                    <span style="font-size: 11px; color: var(--muted); text-align: center;">Priya M.</span>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; animation: fadeUp 0.5s ease 0.28s both;">
+                    <div style="position: relative;">
+                        <svg width="56" height="56" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="32" fill="#DC262633" />
+                            <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                            <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                            <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                            <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                            <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                            <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                            <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                            <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                        </svg>
+                        <div style="position: absolute; bottom: 0; right: 0; width: 14px; height: 14px; border-radius: 50%; background: var(--green); border: 2px solid var(--surface);"></div>
+                    </div>
+                    <span style="font-size: 11px; color: var(--muted); text-align: center;">Theo B.</span>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; animation: fadeUp 0.5s ease 0.35s both;">
+                    <div style="position: relative;">
+                        <svg width="56" height="56" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="32" fill="#D9770633" />
+                            <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                            <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                            <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                            <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                            <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                            <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                            <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                            <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                        </svg>
+                        <div style="position: absolute; bottom: 0; right: 0; width: 14px; height: 14px; border-radius: 50%; background: var(--green); border: 2px solid var(--surface);"></div>
+                    </div>
+                    <span style="font-size: 11px; color: var(--muted); text-align: center;">Sam C.</span>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; animation: fadeUp 0.5s ease 0.42s both;">
+                    <div style="position: relative;">
+                        <svg width="56" height="56" viewBox="0 0 64 64">
+                            <circle cx="32" cy="32" r="32" fill="#DB277733" />
+                            <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                            <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                            <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                            <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                            <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                            <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                            <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                            <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                        </svg>
+                        <div style="position: absolute; bottom: 0; right: 0; width: 14px; height: 14px; border-radius: 50%; background: var(--green); border: 2px solid var(--surface);"></div>
+                    </div>
+                    <span style="font-size: 11px; color: var(--muted); text-align: center;">Alex L.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Teaser -->
+    <section style="padding: 100px 40px; max-width: 860px; margin: 0 auto; text-align: center;">
+        <span style="font-size: 11px; color: var(--amber); font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Pricing</span>
+        <h2 style="font-size: clamp(28px, 4vw, 44px); font-weight: 800; letter-spacing: -1px; margin-bottom: 14px;">Start free, upgrade when ready</h2>
+        <p style="font-size: 16px; color: var(--muted); line-height: 1.75; margin-bottom: 40px;">Individuals get EchoNote free forever. Teams unlock unlimited meetings, advanced AI, and priority support.</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px;">
+            <div style="background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 28px 24px;">
+                <div style="font-size: 12px; font-weight: 700; color: var(--purple); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Free</div>
+                <div style="font-size: 34px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px;">$0</div>
+                <div style="font-size: 12px; color: var(--dim); margin-bottom: 20px;">per seat / month</div>
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="color: var(--green); font-size: 14px;">✓</span>
+                        <span style="font-size: 13px; color: var(--muted);">5 meetings/mo</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="color: var(--green); font-size: 14px;">✓</span>
+                        <span style="font-size: 13px; color: var(--muted);">Basic summaries</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="color: var(--green); font-size: 14px;">✓</span>
+                        <span style="font-size: 13px; color: var(--muted);">1 month history</span>
+                    </div>
+                </div>
+                <button class="cta-btn" onclick="window.location.href='/dashboard'" style="margin-top: 20px; width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: none; color: var(--muted); font-size: 13px; fontWeight: 600; cursor: pointer;">Choose plan</button>
+            </div>
+            <div style="background: linear-gradient(160deg, var(--purple)22, var(--cyan)11); border: 1px solid var(--purple)66; border-radius: 18px; padding: 28px 24px; box-shadow: 0 0 40px var(--purple)22;">
+                <div style="font-size: 12px; font-weight: 700; color: var(--purple); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Pro</div>
+                <div style="font-size: 34px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px;">$12</div>
+                <div style="font-size: 12px; color: var(--dim); margin-bottom: 20px;">per seat / month</div>
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="color: var(--green); font-size: 14px;">✓</span>
+                        <span style="font-size: 13px; color: var(--muted);">Unlimited meetings</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="color: var(--green); font-size: 14px;">✓</span>
+                        <span style="font-size: 13px; color: var(--muted);">AI action items</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="color: var(--green); font-size: 14px;">✓</span>
+                        <span style="font-size: 13px; color: var(--muted);">6 months history</span>
+                    </div>
+                </div>
+                <button class="cta-btn" onclick="window.location.href='/dashboard'" style="margin-top: 20px; width: 100%; padding: 10px; border-radius: 10px; border: 1px solid transparent; background: linear-gradient(135deg, #7C3AED, #6D28D9); color: #fff; font-size: 13px; fontWeight: 600; cursor: pointer; box-shadow: 0 4px 20px #7C3AED55;">Get started →</button>
+            </div>
+            <div style="background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 28px 24px;">
+                <div style="font-size: 12px; font-weight: 700; color: var(--purple); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Team</div>
+                <div style="font-size: 34px; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px;">$29</div>
+                <div style="font-size: 12px; color: var(--dim); margin-bottom: 20px;">per seat / month</div>
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="color: var(--green); font-size: 14px;">✓</span>
+                        <span style="font-size: 13px; color: var(--muted);">Everything in Pro</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="color: var(--green); font-size: 14px;">✓</span>
+                        <span style="font-size: 13px; color: var(--muted);">Analytics dashboard</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span style="color: var(--green); font-size: 14px;">✓</span>
+                        <span style="font-size: 13px; color: var(--muted);">Priority support</span>
+                    </div>
+                </div>
+                <button class="cta-btn" onclick="window.location.href='/dashboard'" style="margin-top: 20px; width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: none; color: var(--muted); font-size: 13px; fontWeight: 600; cursor: pointer;">Choose plan</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section style="margin: 0 40px 80px; border-radius: 28px; background: linear-gradient(135deg, var(--purple)22, var(--cyan)18); border: 1px solid var(--purple)33; padding: 72px 40px; text-align: center; position: relative; overflow: hidden;">
+        <div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, var(--purple)11, transparent 70%);"></div>
+        <div style="display: flex; justify-content: center; margin-bottom: 28px;">
+            <div style="display: flex;">
+                <svg width="44" height="44" viewBox="0 0 64 64" style="border-radius: 5px; overflow: hidden; border: 2px solid var(--bg);">
+                    <circle cx="32" cy="32" r="32" fill="#7C3AED33" />
+                    <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                    <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                    <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                </svg>
+                <svg width="44" height="44" viewBox="0 0 64 64" style="border-radius: 5px; overflow: hidden; border: 2px solid var(--bg); margin-left: -12px;">
+                    <circle cx="32" cy="32" r="32" fill="#0891B233" />
+                    <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                    <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                    <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                </svg>
+                <svg width="44" height="44" viewBox="0 0 64 64" style="border-radius: 5px; overflow: hidden; border: 2px solid var(--bg); margin-left: -12px;">
+                    <circle cx="32" cy="32" r="32" fill="#05966933" />
+                    <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                    <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                    <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                </svg>
+                <svg width="44" height="44" viewBox="0 0 64 64" style="border-radius: 5px; overflow: hidden; border: 2px solid var(--bg); margin-left: -12px;">
+                    <circle cx="32" cy="32" r="32" fill="#DC262633" />
+                    <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                    <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                    <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                </svg>
+                <svg width="44" height="44" viewBox="0 0 64 64" style="border-radius: 5px; overflow: hidden; border: 2px solid var(--bg); margin-left: -12px;">
+                    <circle cx="32" cy="32" r="32" fill="#D9770633" />
+                    <rect x="26" y="44" width="12" height="10" rx="4" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="34" rx="14" ry="16" fill="#FDDBB4" />
+                    <ellipse cx="32" cy="22" rx="14" ry="10" fill="#4A4A4A" />
+                    <rect x="18" y="22" width="28" height="8" fill="#4A4A4A" />
+                    <ellipse cx="26" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <ellipse cx="38" cy="32" rx="2.5" ry="2.8" fill="#fff" />
+                    <circle cx="26.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                    <circle cx="38.8" cy="32.5" r="1.6" fill="#1A1A1A" />
+                </svg>
+            </div>
+        </div>
+        <h2 style="font-size: clamp(28px, 4vw, 48px); font-weight: 800; letter-spacing: -1.5px; margin-bottom: 16px;">Your next meeting deserves EchoNote</h2>
+        <p style="font-size: 16px; color: var(--muted); max-width: 480px; margin: 0 auto 32px; line-height: 1.75;">Join thousands of teams who've stopped losing great ideas to bad notes.</p>
+        <button class="cta-btn" onclick="window.location.href='/dashboard'" style="background: linear-gradient(135deg, #7C3AED, #6D28D9); border: none; color: #fff; font-size: 15px; font-weight: 700; padding: 16px 40px; border-radius: 14px; cursor: pointer; box-shadow: 0 8px 32px #7C3AED55;">
+            Get started free — no credit card
+        </button>
+    </section>
+
+    <!-- Footer -->
+    <footer style="border-top: 1px solid var(--border); padding: 32px 40px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(135deg, var(--purple), var(--cyan)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 12px;">E</div>
+            <span style="font-weight: 700; font-size: 14px;">EchoNote</span>
+        </div>
+        <div style="display: flex; gap: 24px;">
+            <span style="font-size: 12px; color: var(--dim); cursor: pointer;">Privacy</span>
+            <span style="font-size: 12px; color: var(--dim); cursor: pointer;">Terms</span>
+            <span style="font-size: 12px; color: var(--dim); cursor: pointer;">Security</span>
+            <span style="font-size: 12px; color: var(--dim); cursor: pointer;">Contact</span>
+        </div>
+        <span style="font-size: 12px; color: var(--dim);">&copy; 2025 EchoNote AI, Inc.</span>
+    </footer>
+
+    <script>
+        // Navigation scroll effect
+        let scrolled = false;
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            scrolled = window.scrollY > 40;
+            if (scrolled) {
+                navbar.style.background = '#08090fee';
+                navbar.style.borderBottom = `1px solid var(--border)`;
+                navbar.style.backdropFilter = 'blur(20px)';
+            } else {
+                navbar.style.background = 'transparent';
+                navbar.style.borderBottom = '1px solid transparent';
+                navbar.style.backdropFilter = 'none';
+            }
+        });
+
+        // Email submission
+        let submitted = false;
+        function handleEmailSubmit() {
+            if (!submitted) {
+                const emailInput = document.getElementById('email-input');
+                const email = emailInput.value;
+                if (email && email.includes('@')) {
+                    submitted = true;
+                    event.target.textContent = 'You\'re on the list!';
+                    event.target.style.background = 'linear-gradient(135deg, #10B981, #059669)';
+                    console.log('Email submitted:', email);
+                } else {
+                    emailInput.style.borderColor = '#EF4444';
+                    setTimeout(() => {
+                        emailInput.style.borderColor = 'var(--border)';
+                    }, 2000);
+                }
+            }
+        }
+
+        // Add enter key support for email input
+        document.getElementById('email-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleEmailSubmit();
+            }
+        });
+    </script>
+</body>
+</html>
