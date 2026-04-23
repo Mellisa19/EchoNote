@@ -109,6 +109,71 @@
                 <button class="promo-banner-close">?</button>
             </div>
 
+            <!-- Authentication Modals -->
+            <div id="login-modal" class="auth-modal">
+                <div class="auth-modal-content">
+                    <div class="auth-modal-header">
+                        <h2>Welcome Back</h2>
+                        <button class="auth-modal-close" onclick="closeAuthModal()">
+                            <span class="material-icons">close</span>
+                        </button>
+                    </div>
+                    <div class="auth-modal-body">
+                        <form id="login-form">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" class="form-control" id="login-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" class="form-control" id="login-password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary full-width">Sign In</button>
+                        </form>
+                        <div class="auth-divider">
+                            <span>or</span>
+                        </div>
+                        <button class="btn btn-secondary full-width" onclick="showRegisterModal()">
+                            Create Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="register-modal" class="auth-modal">
+                <div class="auth-modal-content">
+                    <div class="auth-modal-header">
+                        <h2>Create Account</h2>
+                        <button class="auth-modal-close" onclick="closeAuthModal()">
+                            <span class="material-icons">close</span>
+                        </button>
+                    </div>
+                    <div class="auth-modal-body">
+                        <form id="register-form">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" class="form-control" id="register-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" class="form-control" id="register-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" class="form-control" id="register-password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary full-width">Sign Up</button>
+                        </form>
+                        <div class="auth-divider">
+                            <span>or</span>
+                        </div>
+                        <button class="btn btn-secondary full-width" onclick="showLoginModal()">
+                            Sign In
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Dynamic Content Area -->
             <div id="dynamic-content">
                 <!-- Dashboard View -->
@@ -974,6 +1039,251 @@
         if (e.key === 'Escape' && isMenuOpen) {
             closeMobileMenu();
         }
+        if (e.key === 'Escape') {
+            closeAuthModal();
+        }
+    });
+
+    // Authentication System
+    let currentUser = null;
+    let isAuthenticated = false;
+
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyCyyeUZB7QMkozvyJyf2SvV7KsqcSEHIcI",
+        authDomain: "echonote-bd009.firebaseapp.com",
+        databaseURL: "https://echonote-bd009-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "echonote-bd009",
+        storageBucket: "echonote-bd009.firebasestorage.app",
+        messagingSenderId: "172798279810",
+        appId: "1:172798279810:web:70a1ead77d4e89ae59b49b",
+        measurementId: "G-JFXT9Y8CSE"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Authentication functions
+    function showLoginModal() {
+        document.getElementById('login-modal').classList.add('active');
+        document.getElementById('register-modal').classList.remove('active');
+    }
+
+    function showRegisterModal() {
+        document.getElementById('register-modal').classList.add('active');
+        document.getElementById('login-modal').classList.remove('active');
+    }
+
+    function closeAuthModal() {
+        document.getElementById('login-modal').classList.remove('active');
+        document.getElementById('register-modal').classList.remove('active');
+    }
+
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        
+        const container = document.getElementById('toast-container') || createToastContainer();
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        `;
+        document.body.appendChild(container);
+        return container;
+    }
+
+    // Handle login form submission
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        
+        try {
+            const userCredential = await auth.signInWithEmailAndPassword(email, password);
+            currentUser = userCredential.user;
+            isAuthenticated = true;
+            closeAuthModal();
+            showToast('Successfully logged in!', 'success');
+            updateUserUI();
+        } catch (error) {
+            showToast(error.message, 'error');
+        }
+    });
+
+    // Handle register form submission
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('register-name').value;
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+        
+        try {
+            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+            await userCredential.user.updateProfile({
+                displayName: name
+            });
+            currentUser = userCredential.user;
+            isAuthenticated = true;
+            closeAuthModal();
+            showToast('Account created successfully!', 'success');
+            updateUserUI();
+        } catch (error) {
+            showToast(error.message, 'error');
+        }
+    });
+
+    function updateUserUI() {
+        if (currentUser && isAuthenticated) {
+            // Update user avatar
+            const userAvatar = document.querySelector('.user-avatar');
+            if (userAvatar) {
+                const initials = currentUser.displayName ? 
+                    currentUser.displayName.split(' ').map(n => n[0]).join('').toUpperCase() : 
+                    currentUser.email[0].toUpperCase();
+                userAvatar.textContent = initials;
+            }
+            
+            // Show main content
+            document.getElementById('dynamic-content').style.display = 'block';
+        } else {
+            // Show login modal if not authenticated
+            showLoginModal();
+            document.getElementById('dynamic-content').style.display = 'none';
+        }
+    }
+
+    // Handle authentication state changes
+    auth.onAuthStateChanged((user) => {
+        currentUser = user;
+        isAuthenticated = !!user;
+        updateUserUI();
+    });
+
+    // Fix mobile click interactions
+    function setupMobileClickHandlers() {
+        // Sidebar navigation
+        const sidebarIcons = document.querySelectorAll('.sidebar-icon');
+        sidebarIcons.forEach(icon => {
+            icon.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Remove active class from all icons
+                sidebarIcons.forEach(i => i.classList.remove('active'));
+                // Add active class to clicked icon
+                this.classList.add('active');
+                
+                // Handle navigation
+                const viewId = this.id.replace('nav-', '');
+                handleNavigation(viewId);
+                
+                // Close mobile menu
+                if (window.innerWidth <= 768) {
+                    closeMobileMenu();
+                }
+            });
+        });
+
+        // Quick action buttons
+        const quickActionBtns = document.querySelectorAll('.quick-action-btn');
+        quickActionBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                handleQuickAction(this);
+            });
+        });
+
+        // Meeting items
+        const meetingItems = document.querySelectorAll('.meeting-item');
+        meetingItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                handleMeetingClick(this);
+            });
+        });
+
+        // User avatar dropdown
+        const userAvatar = document.querySelector('.user-avatar');
+        if (userAvatar) {
+            userAvatar.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleUserDropdown();
+            });
+        }
+    }
+
+    function handleNavigation(viewId) {
+        const topNavTitle = document.querySelector('.top-nav-title');
+        if (topNavTitle) {
+            const titles = {
+                'home': 'Home',
+                'meetings': 'Meetings',
+                'transcripts': 'Transcripts',
+                'upload': 'Upload',
+                'integrations': 'Integrations',
+                'analytics': 'Analytics',
+                'skills': 'AI Skills',
+                'team': 'Team',
+                'favourites': 'Favourites',
+                'settings': 'Settings',
+                'more': 'More'
+            };
+            topNavTitle.textContent = titles[viewId] || 'Home';
+        }
+        
+        showToast(`Navigated to ${viewId}`, 'info');
+    }
+
+    function handleQuickAction(btn) {
+        const action = btn.textContent.trim();
+        showToast(`${action} clicked`, 'info');
+    }
+
+    function handleMeetingClick(meetingItem) {
+        const meetingTitle = meetingItem.querySelector('.meeting-title')?.textContent || 'Meeting';
+        showToast(`Opening ${meetingTitle}`, 'info');
+    }
+
+    function toggleUserDropdown() {
+        showToast('User menu clicked', 'info');
+    }
+
+    // Initialize mobile click handlers
+    document.addEventListener('DOMContentLoaded', function() {
+        setupMobileClickHandlers();
+        updateUserUI();
+    });
+
+    // Re-setup handlers when content changes
+    const observer = new MutationObserver(function(mutations) {
+        setupMobileClickHandlers();
+    });
+
+    observer.observe(document.getElementById('dynamic-content'), {
+        childList: true,
+        subtree: true
     });
 </script>
 </body>

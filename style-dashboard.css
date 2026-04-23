@@ -28,56 +28,56 @@ body {
 
 /* BLOB 1 - Violet, top-left */
 .b1 {
-  width: 65vw; height: 65vw;
-  max-width: 700px; max-height: 700px;
-  background: radial-gradient(circle at 40% 40%, #7C3AED 0%, #4C1D95 45%, transparent 70%);
-  top: -15%; left: -10%;
-  filter: blur(60px);
-  opacity: 0.7;
+  width: 75vw; height: 75vw;
+  max-width: 800px; max-height: 800px;
+  background: radial-gradient(circle at 40% 40%, #7C3AED 0%, #4C1D95 35%, transparent 65%);
+  top: -20%; left: -15%;
+  filter: blur(80px);
+  opacity: 0.8;
   animation: move1 14s ease-in-out infinite alternate;
 }
 
 /* BLOB 2 - Cyan, top-right */
 .b2 {
-  width: 55vw; height: 55vw;
-  max-width: 600px; max-height: 600px;
-  background: radial-gradient(circle at 60% 30%, #06B6D4 0%, #0284C7 40%, transparent 68%);
-  top: -5%; right: -10%;
-  filter: blur(55px);
-  opacity: 0.65;
+  width: 65vw; height: 65vw;
+  max-width: 700px; max-height: 700px;
+  background: radial-gradient(circle at 60% 30%, #06B6D4 0%, #0284C7 35%, transparent 65%);
+  top: -10%; right: -15%;
+  filter: blur(75px);
+  opacity: 0.75;
   animation: move2 18s ease-in-out infinite alternate;
 }
 
 /* BLOB 3 - Hot pink, bottom-left */
 .b3 {
-  width: 50vw; height: 50vw;
-  max-width: 560px; max-height: 560px;
-  background: radial-gradient(circle at 50% 50%, #DB2777 0%, #9D174D 45%, transparent 68%);
-  bottom: -10%; left: 5%;
-  filter: blur(65px);
-  opacity: 0.55;
+  width: 60vw; height: 60vw;
+  max-width: 650px; max-height: 650px;
+  background: radial-gradient(circle at 50% 50%, #DB2777 0%, #9D174D 40%, transparent 65%);
+  bottom: -15%; left: 0%;
+  filter: blur(70px);
+  opacity: 0.65;
   animation: move3 20s ease-in-out infinite alternate;
 }
 
 /* BLOB 4 - Indigo, bottom-right */
 .b4 {
-  width: 48vw; height: 48vw;
-  max-width: 520px; max-height: 520px;
-  background: radial-gradient(circle at 50% 60%, #6366F1 0%, #3730A3 45%, transparent 68%);
-  bottom: -5%; right: -8%;
-  filter: blur(60px);
-  opacity: 0.6;
+  width: 55vw; height: 55vw;
+  max-width: 600px; max-height: 600px;
+  background: radial-gradient(circle at 50% 60%, #6366F1 0%, #3730A3 40%, transparent 65%);
+  bottom: -10%; right: -12%;
+  filter: blur(70px);
+  opacity: 0.7;
   animation: move4 16s ease-in-out infinite alternate;
 }
 
 /* BLOB 5 - Teal, centre accent */
 .b5 {
-  width: 35vw; height: 35vw;
-  max-width: 400px; max-height: 400px;
-  background: radial-gradient(circle at 50% 50%, #0D9488 0%, #0F766E 45%, transparent 68%);
-  top: 35%; left: 38%;
-  filter: blur(70px);
-  opacity: 0.45;
+  width: 45vw; height: 45vw;
+  max-width: 500px; max-height: 500px;
+  background: radial-gradient(circle at 50% 50%, #0D9488 0%, #0F766E 40%, transparent 65%);
+  top: 30%; left: 35%;
+  filter: blur(80px);
+  opacity: 0.55;
   animation: move5 22s ease-in-out infinite alternate;
 }
 
@@ -2904,6 +2904,136 @@ main {
     }
 }
 
+/* Authentication Modals */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.auth-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.auth-modal-content {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    max-width: 450px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.auth-modal.active .auth-modal-content {
+    transform: scale(1);
+}
+
+.auth-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.auth-modal-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+.auth-modal-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.auth-modal-close:hover {
+    background: var(--card);
+    color: var(--text);
+}
+
+.auth-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.form-control {
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card);
+    color: var(--text);
+    font-size: 16px;
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.full-width {
+    width: 100%;
+}
+
+.auth-divider {
+    text-align: center;
+    position: relative;
+    margin: 8px 0;
+}
+
+.auth-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border);
+}
+
+.auth-divider span {
+    background: var(--surface);
+    padding: 0 16px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
 /* Touch-friendly improvements */
 @media (hover: none) and (pointer: coarse) {
     .btn:hover,
@@ -2926,6 +3056,7 @@ main {
         display: flex;
         align-items: center;
         justify-content: center;
+        cursor: pointer;
     }
     
     .meeting-item {
@@ -2935,6 +3066,30 @@ main {
     
     .integration-card {
         padding: 24px;
+    }
+    
+    /* Fix mobile click issues */
+    .sidebar-icon,
+    .btn,
+    .icon-btn,
+    .mobile-menu-toggle,
+    .user-avatar,
+    .stat-card,
+    .meeting-card,
+    .integration-card,
+    .quick-action-btn {
+        -webkit-tap-highlight-color: rgba(124, 58, 237, 0.3);
+        touch-action: manipulation;
+    }
+    
+    /* Ensure clickable elements have proper cursor */
+    .sidebar-icon,
+    .btn,
+    .icon-btn,
+    .mobile-menu-toggle,
+    .user-avatar,
+    .auth-modal-close {
+        cursor: pointer;
     }
 }
 
