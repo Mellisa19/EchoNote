@@ -32,18 +32,31 @@ const analytics = require('./src/server/analytics');
 const emailService = require('./src/server/email');
 
 // Middleware
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+    ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+    : [];
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000', ...allowedOrigins],
   credentials: true
 }));
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
-app.use(express.static(__dirname));
+
+// Serve static files from the React app build folder
+const buildPath = path.join(__dirname, 'dist');
+if (fs.existsSync(buildPath)) {
+    app.use(express.static(buildPath));
+} else {
+    app.use(express.static(__dirname));
+}
 
 // Routes to serve index.html for React Router paths
 const reactRoutes = ['/', '/dashboard', '/login', '/signup', '/records', '/calendar', '/settings', '/integrations'];
 app.get(reactRoutes, (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    const indexPath = fs.existsSync(buildPath) 
+        ? path.join(buildPath, 'index.html')
+        : path.join(__dirname, 'index.html');
+    res.sendFile(indexPath);
 });
 
 // Authentication Middleware
