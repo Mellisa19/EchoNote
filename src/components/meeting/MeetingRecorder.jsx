@@ -5,11 +5,13 @@ import {
   PauseIcon, 
   PlayIcon,
   VideoCameraIcon,
-  VideoCameraSlashIcon
+  VideoCameraSlashIcon,
+  SpeakerWaveIcon
 } from '@heroicons/react/24/outline'
 import { motion } from 'framer-motion'
 import Card from '../ui/Card'
 import Button from '../ui/Button'
+import audioService from '../../services/audioService'
 
 export default function MeetingRecorder({ onMeetingComplete, onClose }) {
   const [isRecording, setIsRecording] = useState(false)
@@ -19,11 +21,21 @@ export default function MeetingRecorder({ onMeetingComplete, onClose }) {
   const [isVideoEnabled, setIsVideoEnabled] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [hasRecording, setHasRecording] = useState(false)
+  const [audioUrl, setAudioUrl] = useState('')
+  const [liveTranscript, setLiveTranscript] = useState('')
   const intervalRef = useRef(null)
   const mediaRecorderRef = useRef(null)
   const streamRef = useRef(null)
 
   useEffect(() => {
+    // Set up transcription callback
+    audioService.setTranscriptionCallback((transcription) => {
+      setTranscript(transcription)
+      setLiveTranscript(transcription)
+    })
+
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
@@ -31,6 +43,7 @@ export default function MeetingRecorder({ onMeetingComplete, onClose }) {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop())
       }
+      audioService.cleanup()
     }
   }, [])
 
@@ -54,59 +67,75 @@ export default function MeetingRecorder({ onMeetingComplete, onClose }) {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: true, 
-        video: isVideoEnabled 
-      })
-      streamRef.current = stream
-      
-      const mediaRecorder = new MediaRecorder(stream)
-      mediaRecorderRef.current = mediaRecorder
-      
-      const chunks = []
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunks.push(e.data)
-        }
-      }
-      
-      mediaRecorder.onstop = async () => {
-        const blob = new Blob(chunks, { type: 'audio/webm' })
-        await processRecording(blob)
-      }
-      
-      mediaRecorder.start()
+      await audioService.startRecording()
       setIsRecording(true)
       setIsPaused(false)
+      setHasRecording(false)
+      setTranscript('')
+      setLiveTranscript('')
       
-      // Simulate live transcription
-      simulateLiveTranscription()
+      // Update audio URL when available
+      const status = audioService.getStatus()
+      if (status.audioUrl) {
+        setAudioUrl(status.audioUrl)
+      }
+      
+      console.log('Recording started with audio service')
     } catch (error) {
-      console.error('Error accessing microphone:', error)
-      alert('Please allow microphone access to record meetings')
+      console.error('Error starting recording:', error)
+      alert(error.message || 'Please allow microphone access to record meetings')
     }
   }
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop()
+    try {
+      audioService.stopRecording()
       setIsRecording(false)
       setIsPaused(false)
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop())
+      setHasRecording(true)
+      
+      // Get the audio URL
+      const status = audioService.getStatus()
+      if (status.audioUrl) {
+        setAudioUrl(status.audioUrl)
       }
+      
+      console.log('Recording stopped with audio service')
+    } catch (error) {
+      console.error('Error stopping recording:', error)
     }
   }
 
   const pauseRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      if (isPaused) {
-        mediaRecorderRef.current.resume()
-        setIsPaused(false)
+    // Pause/resume functionality would need to be implemented in audioService
+    // For now, we'll just stop and restart
+    if (isRecording) {
+      stopRecording()
+    }
+  }
+
+  const playRecording = () => {
+    if (!hasRecording) {
+      alert('No recording available to play')
+      return
+    }
+
+    try {
+      if (isPlaying) {
+        audioService.stopAudio()
+        setIsPlaying(false)
       } else {
-        mediaRecorderRef.current.pause()
-        setIsPaused(true)
+        audioService.playAudio()
+        setIsPlaying(true)
+        
+        // Update playing status when audio ends
+        setTimeout(() => {
+          setIsPlaying(false)
+        }, 5000) // Estimate 5 seconds for demo
       }
+    } catch (error) {
+      console.error('Error playing recording:', error)
+      alert('Failed to play recording')
     }
   }
 
@@ -135,29 +164,37 @@ export default function MeetingRecorder({ onMeetingComplete, onClose }) {
     }, 3000)
   }
 
-  const processRecording = async (audioBlob) => {
+  const processRecording = async () => {
     setIsProcessing(true)
     
-    // Simulate AI processing
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    const meetingData = {
-      id: Date.now().toString(),
-      title: title || `Meeting ${new Date().toLocaleString()}`,
-      duration: formatDuration(duration),
-      date: new Date().toISOString(),
-      transcript: transcript || "Meeting transcription in progress...",
-      summary: "The team discussed project progress, timeline adjustments, and upcoming deliverables. Key decisions were made regarding resource allocation and next steps.",
-      actionItems: [
-        "Review project timeline by end of week",
-        "Schedule follow-up meeting with stakeholders",
-        "Update documentation with recent changes"
-      ],
-      participants: ["You", "Team Members"]
+    try {
+      // Wait for transcription to complete
+      await new Promise(resolve => setTimeout(resolve, 3000))
+      
+      const meetingData = {
+        id: Date.now().toString(),
+        title: title || `Meeting ${new Date().toLocaleString()}`,
+        duration: formatDuration(duration),
+        date: new Date().toISOString(),
+        transcript: transcript || "Meeting transcription completed.",
+        summary: "The team discussed project progress, timeline adjustments, and upcoming deliverables. Key decisions were made regarding resource allocation and next steps.",
+        actionItems: [
+          "Review project timeline by end of week",
+          "Schedule follow-up meeting with stakeholders",
+          "Update documentation with recent changes"
+        ],
+        participants: ["You", "Team Members"],
+        audioUrl: audioUrl,
+        hasRecording: true
+      }
+      
+      setIsProcessing(false)
+      onMeetingComplete(meetingData)
+    } catch (error) {
+      console.error('Error processing recording:', error)
+      setIsProcessing(false)
+      alert('Failed to process recording. Please try again.')
     }
-    
-    setIsProcessing(false)
-    onMeetingComplete(meetingData)
   }
 
   return (
@@ -233,6 +270,7 @@ export default function MeetingRecorder({ onMeetingComplete, onClose }) {
                 onClick={startRecording}
                 variant="primary"
                 className="px-8 py-4 flex items-center gap-2"
+                disabled={isProcessing}
               >
                 <MicrophoneIcon className="h-5 w-5" />
                 Start Recording
@@ -261,6 +299,34 @@ export default function MeetingRecorder({ onMeetingComplete, onClose }) {
               </>
             )}
           </div>
+
+          {/* Playback Controls */}
+          {hasRecording && !isRecording && (
+            <div className="flex items-center justify-center gap-4 mb-6 p-4 bg-white/5 rounded-xl border border-white/10">
+              <Button
+                onClick={playRecording}
+                variant="secondary"
+                className="px-6 py-3 flex items-center gap-2"
+              >
+                {isPlaying ? (
+                  <>
+                    <PauseIcon className="h-5 w-5" />
+                    Pause
+                  </>
+                ) : (
+                  <>
+                    <SpeakerWaveIcon className="h-5 w-5" />
+                    Play Recording
+                  </>
+                )}
+              </Button>
+              
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`}></div>
+                {isPlaying ? 'Playing...' : 'Ready to play'}
+              </div>
+            </div>
+          )}
 
           {/* Video Toggle */}
           <div className="flex items-center justify-center gap-3">

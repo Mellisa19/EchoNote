@@ -2,11 +2,13 @@ import { useState, useRef } from 'react'
 import { 
   DocumentTextIcon, 
   CloudArrowUpIcon,
-  XMarkIcon
+  XMarkIcon,
+  SpeakerWaveIcon
 } from '@heroicons/react/24/outline'
 import { motion } from 'framer-motion'
 import Card from '../ui/Card'
 import Button from '../ui/Button'
+import audioService from '../../services/audioService'
 
 export default function AudioUpload({ onUploadComplete, onClose }) {
   const [isDragging, setIsDragging] = useState(false)
@@ -47,33 +49,41 @@ export default function AudioUpload({ onUploadComplete, onClose }) {
     setIsUploading(true)
     setUploadProgress(0)
     
-    // Simulate upload progress
-    for (let i = 0; i <= 100; i += 10) {
-      await new Promise(resolve => setTimeout(resolve, 200))
-      setUploadProgress(i)
+    try {
+      // Simulate upload progress
+      for (let i = 0; i <= 100; i += 10) {
+        await new Promise(resolve => setTimeout(resolve, 200))
+        setUploadProgress(i)
+      }
+      
+      // Process the uploaded audio file with real transcription
+      const audioData = await audioService.processUploadedFile(selectedFile)
+      
+      const meetingData = {
+        id: Date.now().toString(),
+        title: selectedFile.name.replace(/\.[^/.]+$/, ""),
+        duration: `${Math.floor(audioData.duration / 60)}:${Math.floor(audioData.duration % 60).toString().padStart(2, '0')}`,
+        date: new Date().toISOString(),
+        transcript: audioData.transcription,
+        summary: "This uploaded meeting contains important discussions about project progress and next steps. The AI has identified key decisions and action items.",
+        actionItems: [
+          "Review uploaded meeting notes",
+          "Extract action items from transcript",
+          "Share summary with team members"
+        ],
+        participants: ["You", "Team Members"],
+        type: 'uploaded',
+        audioUrl: audioData.url,
+        fileSize: audioData.size
+      }
+      
+      setIsUploading(false)
+      onUploadComplete(meetingData)
+    } catch (error) {
+      console.error('Error processing uploaded file:', error)
+      setIsUploading(false)
+      alert('Failed to process audio file. Please try again.')
     }
-    
-    // Simulate AI processing
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    const meetingData = {
-      id: Date.now().toString(),
-      title: selectedFile.name.replace(/\.[^/.]+$/, ""),
-      duration: "Uploaded audio",
-      date: new Date().toISOString(),
-      transcript: "Audio transcription completed. The meeting covered project updates, timeline discussions, and action items.",
-      summary: "This uploaded meeting contains important discussions about project progress and next steps. The AI has identified key decisions and action items.",
-      actionItems: [
-        "Review uploaded meeting notes",
-        "Extract action items from transcript",
-        "Share summary with team members"
-      ],
-      participants: ["You", "Team Members"],
-      type: 'uploaded'
-    }
-    
-    setIsUploading(false)
-    onUploadComplete(meetingData)
   }
 
   const formatFileSize = (bytes) => {

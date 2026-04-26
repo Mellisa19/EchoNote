@@ -116,8 +116,8 @@ export default function MeetingAutoJoin({ onJoinMeeting, onClose }) {
     setIsJoining(true)
     
     try {
-      // Simulate joining the meeting
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Actually open the meeting link in a new tab
+      window.open(meetingUrl, '_blank')
       
       // Start recording automatically
       setIsRecording(true)
@@ -129,6 +129,14 @@ export default function MeetingAutoJoin({ onJoinMeeting, onClose }) {
         startTime: new Date().toISOString(),
         type: 'auto-joined',
         source: selectedMeeting ? 'calendar' : 'manual'
+      }
+      
+      // Notify user that meeting has been joined
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('EchoNote - Meeting Joined', {
+          body: `Joined "${meetingData.title}" and started recording`,
+          icon: '/favicon.ico'
+        })
       }
       
       onJoinMeeting(meetingData)

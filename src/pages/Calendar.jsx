@@ -12,8 +12,6 @@ import {
 import { motion } from 'framer-motion'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
-import ProtectedRoute from '../components/auth/ProtectedRoute'
-
 const mockMeetings = [
   {
     id: '1',
@@ -111,8 +109,7 @@ export default function Calendar() {
   }
 
   return (
-    <ProtectedRoute>
-      <DashboardLayout>
+    <DashboardLayout>
         <div className="max-w-7xl mx-auto p-8">
           {/* Header */}
           <div className="mb-10">
@@ -288,6 +285,5 @@ export default function Calendar() {
           </div>
         </div>
       </DashboardLayout>
-    </ProtectedRoute>
   )
 }
