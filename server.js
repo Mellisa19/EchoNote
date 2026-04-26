@@ -9,6 +9,12 @@ const admin = require('firebase-admin');
 
 dotenv.config();
 
+// Ensure uploads directory exists (it's gitignored so won't exist on Render)
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // Initialize Firebase Admin
 const serviceAccount = {
   projectId: process.env.FIREBASE_PROJECT_ID,
