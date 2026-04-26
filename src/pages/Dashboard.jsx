@@ -22,6 +22,7 @@ import Card from '../components/ui/Card'
 import DashboardLayout from '../components/layout/DashboardLayout'
 import MeetingRecorder from '../components/meeting/MeetingRecorder'
 import AudioUpload from '../components/meeting/AudioUpload'
+import MeetingAutoJoin from '../components/meeting/MeetingAutoJoin'
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -31,6 +32,7 @@ export default function Dashboard() {
   const [isRecording, setIsRecording] = useState(false)
   const [showMeetingRecorder, setShowMeetingRecorder] = useState(false)
   const [showAudioUpload, setShowAudioUpload] = useState(false)
+  const [showAutoJoin, setShowAutoJoin] = useState(false)
   const [meetings, setMeetings] = useState([])
   const { user } = useAuth()
 
@@ -55,8 +57,16 @@ export default function Dashboard() {
   }
 
   const handleCalendarConnect = () => {
-    // Implement calendar connection logic
-    alert('Calendar integration coming soon! For now, you can manually schedule meetings.')
+    setShowAutoJoin(true)
+  }
+
+  const handleAutoJoinMeeting = (meetingData) => {
+    setMeetings(prev => [meetingData, ...prev])
+    setShowAutoJoin(false)
+    setSelectedNote(meetingData)
+    if (!aiPanelOpen) {
+      setAiPanelOpen(true)
+    }
   }
 
   const handleAudioUpload = () => {
@@ -335,6 +345,14 @@ export default function Dashboard() {
         <AudioUpload
           onUploadComplete={handleUploadComplete}
           onClose={() => setShowAudioUpload(false)}
+        />
+      )}
+
+      {/* Meeting Auto-Join Modal */}
+      {showAutoJoin && (
+        <MeetingAutoJoin
+          onJoinMeeting={handleAutoJoinMeeting}
+          onClose={() => setShowAutoJoin(false)}
         />
       )}
     </DashboardLayout>
