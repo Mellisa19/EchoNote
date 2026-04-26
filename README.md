@@ -143,10 +143,10 @@ npm run build
 vercel --prod
 ```
 
-### Railway
+### Render
 ```bash
 npm run build
-# Deploy to Railway with build command: npm run build
+# Deploy to Render by connecting your GitHub repository
 ```
 
 ### Netlify

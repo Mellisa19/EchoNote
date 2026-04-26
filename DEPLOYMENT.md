@@ -1,15 +1,15 @@
 # 🚀 EchoNote Deployment Guide
 
-## **Quick Start - Railway (Recommended)**
+## **Quick Start - Render (Recommended)**
 
-### **Step 1: Deploy to Railway**
-1. Go to [railway.app](https://railway.app)
-2. Click "Deploy from GitHub repo"
-3. Select your `EchoNote` repository
-4. Railway will automatically detect it's a Node.js app
+### **Step 1: Deploy to Render**
+1. Go to [render.com](https://render.com)
+2. Click "New" and select "Web Service"
+3. Connect your GitHub repository and select `EchoNote`
+4. Render will detect it's a Node.js app. Set the Build Command to `npm install && npm run build` and Start Command to `npm start`.
 
 ### **Step 2: Configure Environment Variables**
-In Railway dashboard, add these environment variables:
+In Render dashboard under "Environment", add these environment variables:
 
 ```bash
 OPENAI_API_KEY=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
@@ -22,9 +22,9 @@ NODE_ENV=production
 ```
 
 ### **Step 3: Deploy**
-- Click "Deploy" 
-- Railway will build and deploy your app
-- Your app will be available at `https://your-app-name.railway.app`
+- Click "Create Web Service" 
+- Render will build and deploy your app
+- Your app will be available at `https://your-app-name.onrender.com`
 
 ---
 
@@ -106,8 +106,8 @@ For production, consider using cloud storage instead of local files:
 
 ## **Custom Domain Setup**
 
-### **Railway**
-1. Go to Railway dashboard → Settings → Domains
+### **Render**
+1. Go to Render dashboard → Settings → Custom Domains
 2. Add your custom domain
 3. Update DNS records
 
@@ -176,10 +176,10 @@ curl -X POST https://your-app-url.com/api/upload \
 
 ## **Cost Estimates**
 
-### **Railway**
-- Free: $5/month credit
-- Hobby: $5/month
-- Pro: $20/month
+### **Render**
+- Free: $0/month (spins down after inactivity)
+- Individual: $7/month/service
+- Team: $19/user/month
 
 ### **Vercel**
 - Free: 100GB bandwidth, Pro features
@@ -200,7 +200,7 @@ curl -X POST https://your-app-url.com/api/upload \
 
 ## **Next Steps**
 
-1. Choose your platform (Railway recommended)
+1. Choose your platform (Render recommended)
 2. Follow the platform-specific steps
 3. Test all functionality
 4. Set up monitoring
