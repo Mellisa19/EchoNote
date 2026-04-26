@@ -34,7 +34,31 @@ export function AuthProvider({ children }) {
         const result = await getRedirectResult(auth)
         if (result && result.user) {
           console.log('Google redirect sign-in successful:', result.user)
-          setUser(result.user)
+          // Ensure displayName is set for Google redirect users
+          if (!result.user.displayName) {
+            await updateProfile(result.user, { 
+              displayName: result.user.email?.split('@')[0] || 'User' 
+            })
+            await auth.currentUser.reload()
+            setUser({ ...auth.currentUser })
+          } else {
+            setUser(result.user)
+          }
+          
+          // Send welcome email for Google redirect sign-up
+          try {
+            await fetch('/api/auth/welcome', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                email: result.user.email, 
+                name: result.user.displayName || result.user.email?.split('@')[0] || 'User' 
+              })
+            });
+          } catch (emailErr) {
+            console.error('Failed to send welcome email:', emailErr);
+            // Don't block sign-in if email fails
+          }
         }
       } catch (error) {
         console.error('Redirect result error:', error)
@@ -59,6 +83,8 @@ export function AuthProvider({ children }) {
   const signup = async (name, email, password) => {
     const result = await createUserWithEmailAndPassword(auth, email, password)
     await updateProfile(result.user, { displayName: name })
+    await auth.currentUser.reload()
+    setUser({ ...auth.currentUser }) // Trigger state update with new display name
     return result
   }
 
@@ -71,6 +97,12 @@ export function AuthProvider({ children }) {
       } else {
         // Try popup method first
         const result = await signInWithPopup(auth, googleProvider)
+        // Ensure displayName is set for Google users
+        if (result.user && !result.user.displayName) {
+          await updateProfile(result.user, { 
+            displayName: result.user.email?.split('@')[0] || 'User' 
+          })
+        }
         return result
       }
     } catch (error) {

@@ -15,10 +15,13 @@ import {
   PlayIcon,
   PauseIcon
 } from '@heroicons/react/24/outline'
+import { motion } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 import AIPanel from '../components/layout/AIPanel'
 import Card from '../components/ui/Card'
 import DashboardLayout from '../components/layout/DashboardLayout'
+import MeetingRecorder from '../components/meeting/MeetingRecorder'
+import AudioUpload from '../components/meeting/AudioUpload'
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -26,6 +29,9 @@ export default function Dashboard() {
   const [selectedNote, setSelectedNote] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [isRecording, setIsRecording] = useState(false)
+  const [showMeetingRecorder, setShowMeetingRecorder] = useState(false)
+  const [showAudioUpload, setShowAudioUpload] = useState(false)
+  const [meetings, setMeetings] = useState([])
   const { user } = useAuth()
 
   const handleNoteSelect = (note) => {
@@ -36,19 +42,69 @@ export default function Dashboard() {
   }
 
   const handleRecording = () => {
-    setIsRecording(!isRecording)
+    setShowMeetingRecorder(true)
+  }
+
+  const handleMeetingComplete = (meetingData) => {
+    setMeetings(prev => [meetingData, ...prev])
+    setShowMeetingRecorder(false)
+    setSelectedNote(meetingData)
+    if (!aiPanelOpen) {
+      setAiPanelOpen(true)
+    }
+  }
+
+  const handleCalendarConnect = () => {
+    // Implement calendar connection logic
+    alert('Calendar integration coming soon! For now, you can manually schedule meetings.')
+  }
+
+  const handleAudioUpload = () => {
+    setShowAudioUpload(true)
+  }
+
+  const handleUploadComplete = (meetingData) => {
+    setMeetings(prev => [meetingData, ...prev])
+    setShowAudioUpload(false)
+    setSelectedNote(meetingData)
+    if (!aiPanelOpen) {
+      setAiPanelOpen(true)
+    }
   }
 
   const stats = [
-    { label: 'Meetings Today', value: '3', icon: CalendarIcon, color: 'indigo' },
-    { label: 'Total Recordings', value: '47', icon: VideoCameraIcon, color: 'blue' },
-    { label: 'AI Summaries', value: '142', icon: SparklesIcon, color: 'purple' },
-    { label: 'Action Items', value: '23', icon: ChartBarIcon, color: 'green' }
+    { 
+      label: 'Meetings Today', 
+      value: meetings.filter(m => {
+        const today = new Date().toDateString()
+        return new Date(m.date).toDateString() === today
+      }).length.toString() || '0', 
+      icon: CalendarIcon, 
+      color: 'indigo' 
+    },
+    { 
+      label: 'Total Recordings', 
+      value: meetings.length.toString(), 
+      icon: VideoCameraIcon, 
+      color: 'blue' 
+    },
+    { 
+      label: 'AI Summaries', 
+      value: meetings.filter(m => m.summary).length.toString(), 
+      icon: SparklesIcon, 
+      color: 'purple' 
+    },
+    { 
+      label: 'Action Items', 
+      value: meetings.reduce((total, m) => total + (m.actionItems?.length || 0), 0).toString(), 
+      icon: ChartBarIcon, 
+      color: 'green' 
+    }
   ]
 
-  const recentMeetings = [
+  const recentMeetings = meetings.length > 0 ? meetings : [
     {
-      id: '1',
+      id: 'demo-1',
       title: 'Product Planning Session',
       time: '10:00 AM',
       duration: '45 min',
@@ -59,7 +115,7 @@ export default function Dashboard() {
       aiProcessed: true
     },
     {
-      id: '2',
+      id: 'demo-2',
       title: 'Client Review Call',
       time: '2:30 PM',
       duration: '30 min',
@@ -70,7 +126,7 @@ export default function Dashboard() {
       aiProcessed: false
     },
     {
-      id: '3',
+      id: 'demo-3',
       title: 'Team Standup',
       time: '4:00 PM',
       duration: '15 min',
@@ -108,7 +164,7 @@ export default function Dashboard() {
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">
-              Welcome back, {user?.displayName?.split(' ')[0] || 'User'}!
+              Welcome {user?.displayName || 'User'}!
             </h2>
             <p className="text-gray-400 text-lg">What would you like to do today?</p>
           </div>
@@ -157,6 +213,7 @@ export default function Dashboard() {
           <Card 
             variant="blue" 
             className="p-8 cursor-pointer group relative overflow-hidden"
+            onClick={handleAudioUpload}
           >
             <div className="relative z-10">
               <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -173,6 +230,7 @@ export default function Dashboard() {
           <Card 
             variant="orange" 
             className="p-8 cursor-pointer group relative overflow-hidden"
+            onClick={handleCalendarConnect}
           >
             <div className="relative z-10">
               <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -263,6 +321,22 @@ export default function Dashboard() {
         onToggle={() => setAiPanelOpen(!aiPanelOpen)}
         note={selectedNote}
       />
+
+      {/* Meeting Recorder Modal */}
+      {showMeetingRecorder && (
+        <MeetingRecorder
+          onMeetingComplete={handleMeetingComplete}
+          onClose={() => setShowMeetingRecorder(false)}
+        />
+      )}
+
+      {/* Audio Upload Modal */}
+      {showAudioUpload && (
+        <AudioUpload
+          onUploadComplete={handleUploadComplete}
+          onClose={() => setShowAudioUpload(false)}
+        />
+      )}
     </DashboardLayout>
   )
 }

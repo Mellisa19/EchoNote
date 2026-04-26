@@ -17,7 +17,7 @@ const Profile = () => <div className="p-6"><h1>Profile</h1><p>Coming soon...</p>
 function App() {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-brand-dark">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />

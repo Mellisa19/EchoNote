@@ -86,7 +86,7 @@ export default function Login() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-brand-purple">
               <SparklesIcon className="h-6 w-6 text-white" />
             </div>
-            <span className="text-3xl font-bold text-white tracking-tight">MeetingAI</span>
+            <span className="text-3xl font-bold text-white tracking-tight">EchoNote</span>
           </Link>
         </div>
         <h2 className="mt-8 text-center text-4xl font-bold text-white tracking-tight">

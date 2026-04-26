@@ -69,6 +69,21 @@ export default function Signup() {
     try {
       const result = await signInWithGoogle(useRedirect)
       if (!useRedirect && result) {
+        // Send welcome email for Google sign-up
+        try {
+          await fetch('/api/auth/welcome', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              email: result.user.email, 
+              name: result.user.displayName || result.user.email?.split('@')[0] || 'User' 
+            })
+          });
+        } catch (emailErr) {
+          console.error('Failed to send welcome email:', emailErr);
+          // Don't block navigation if email fails
+        }
+        
         navigate('/dashboard')
       }
       // For redirect method, the navigation will be handled by the redirect result check
@@ -97,7 +112,7 @@ export default function Signup() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-brand-purple">
               <SparklesIcon className="h-6 w-6 text-white" />
             </div>
-            <span className="text-3xl font-bold text-white tracking-tight">MeetingAI</span>
+            <span className="text-3xl font-bold text-white tracking-tight">EchoNote</span>
           </Link>
         </div>
         <h2 className="mt-8 text-center text-4xl font-bold text-white tracking-tight">

@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion'
 
 const buttonVariants = {
-  primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500',
-  secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500',
-  outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-primary-500',
-  ghost: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:ring-gray-500',
-  accent: 'bg-accent-600 text-white hover:bg-accent-700 focus:ring-accent-500'
+  primary: 'btn-brand-purple',
+  secondary: 'bg-white/10 text-white hover:bg-white/20 border border-white/20',
+  outline: 'border border-white/20 text-white hover:bg-white/10',
+  ghost: 'text-gray-400 hover:text-white hover:bg-white/10',
+  danger: 'bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30',
+  accent: 'btn-brand-blue'
 }
 
 const sizeVariants = {

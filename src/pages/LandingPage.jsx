@@ -132,7 +132,7 @@ export default function LandingPage() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-brand-purple">
                   <SparklesIcon className="h-6 w-6 text-white" />
                 </div>
-                <span className="text-2xl font-bold text-white tracking-tight">MeetingAI</span>
+                <span className="text-2xl font-bold text-white tracking-tight">EchoNote</span>
               </div>
             </div>
             
@@ -168,7 +168,7 @@ export default function LandingPage() {
                 <span className="bg-gradient-to-r from-brand-purple to-brand-pink bg-clip-text text-transparent">notes again</span>
               </h1>
               <p className="text-xl sm:text-2xl text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed">
-                MeetingAI transcribes, summarizes, and extracts action items from your calls automatically. Focus on the conversation, we'll handle the rest.
+                EchoNote transcribes, summarizes, and extracts action items from your calls automatically. Focus on the conversation, we'll handle the rest.
               </p>
             </motion.div>
 
@@ -361,7 +361,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto rounded-[3rem] bg-gradient-to-br from-brand-purple to-brand-pink p-12 sm:p-20 text-center relative overflow-hidden shadow-2xl shadow-purple-500/20">
           <div className="relative z-10">
             <h2 className="text-4xl sm:text-6xl font-bold text-white mb-8 tracking-tight">Ready to master your meetings?</h2>
-            <p className="text-white/80 text-xl mb-12 max-w-2xl mx-auto">Join thousands of teams who are already saving time and capturing every detail with MeetingAI.</p>
+            <p className="text-white/80 text-xl mb-12 max-w-2xl mx-auto">Join thousands of teams who are already saving time and capturing every detail with EchoNote.</p>
             <Link to="/signup">
               <button className="bg-white text-brand-purple px-10 py-5 rounded-2xl font-bold text-xl hover:bg-gray-100 transition-all shadow-xl">
                 Get Started Free
@@ -381,7 +381,7 @@ export default function LandingPage() {
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-brand-purple">
                   <SparklesIcon className="h-6 w-6 text-white" />
                 </div>
-                <span className="text-2xl font-bold text-white tracking-tight">MeetingAI</span>
+                <span className="text-2xl font-bold text-white tracking-tight">EchoNote</span>
               </div>
               <p className="text-gray-500 text-lg max-w-xs leading-relaxed">Making meetings productive and actionable with industry-leading AI intelligence.</p>
             </div>
@@ -413,7 +413,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/5 text-gray-600 text-sm font-medium">
-            <p>© 2024 MeetingAI Inc. All rights reserved.</p>
+            <p>© 2026 EchoNote Inc. All rights reserved.</p>
             <div className="flex gap-8 mt-4 md:mt-0">
               <a href="#" className="hover:text-white transition-colors">Twitter</a>
               <a href="#" className="hover:text-white transition-colors">LinkedIn</a>

@@ -159,9 +159,15 @@ app.post('/api/auth/welcome', async (req, res) => {
     if (!email || !name) return res.status(400).json({ error: 'Email and name required' });
     
     try {
-        await emailService.sendWelcomeEmail(email, name);
-        res.json({ success: true, message: 'Welcome email sent' });
+        const result = await emailService.sendWelcomeEmail(email, name);
+        if (result.success) {
+            res.json({ success: true, message: 'Welcome email sent', messageId: result.messageId });
+        } else {
+            console.warn('Welcome email failed:', result);
+            res.json({ success: false, message: 'Email service not configured', reason: result.reason || result.error });
+        }
     } catch (error) {
+        console.error('Welcome email endpoint error:', error);
         res.status(500).json({ error: 'Failed to send welcome email' });
     }
 });
