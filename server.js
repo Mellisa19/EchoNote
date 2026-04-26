@@ -15,6 +15,15 @@ if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
+// Validate required environment variables before starting
+const requiredEnvVars = ['FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY', 'FIREBASE_DATABASE_URL'];
+const missingVars = requiredEnvVars.filter(v => !process.env[v]);
+if (missingVars.length > 0) {
+    console.error(`❌ Missing required environment variables: ${missingVars.join(', ')}`);
+    console.error('Please set these in your Render dashboard under Environment Variables.');
+    process.exit(1);
+}
+
 // Initialize Firebase Admin
 const serviceAccount = {
   projectId: process.env.FIREBASE_PROJECT_ID,
